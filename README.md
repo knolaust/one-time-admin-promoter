@@ -2,7 +2,7 @@
 
 A single-site WordPress plugin that promotes one existing user to Administrator, copies that user's current email to **Settings > General > Administration Email Address**, and deactivates itself.
 
-The handover runs on plugin activation. This version has no handover form or settings screen.
+Activate the plugin, then open **Tools > Admin Handover**, enter an existing username, and confirm the handover. Activation alone does not change any user or email setting. No FTP, configuration edit, or password is needed when installing through WordPress.
 
 ## Requirements
 
@@ -14,18 +14,15 @@ The handover runs on plugin activation. This version has no handover form or set
 ## Installation and use
 
 1. Back up the site/database. Confirm the intended account exists under **Users** and has the correct email address.
-2. Before activating the plugin, add the following to `wp-config.php`, before the stop-editing line. Replace `existing_login` with the exact, case-sensitive username—not a display name or email address:
-
-   ```php
-   define( 'OTAP_TARGET_USERNAME', 'existing_login' );
-   ```
-
-3. Place this folder in `wp-content/plugins/`, or ZIP the `one-time-admin-promoter` folder and install it through **Plugins > Add New Plugin > Upload Plugin**.
-4. Sign in as an authorized administrator and activate **One-Time Admin Promoter** through the normal WordPress Plugins screen. Activation immediately performs the handover; there is no separate confirmation form.
+2. Sign in as an administrator with permission to install/activate plugins, promote users, and manage site settings. If replacing an older version, deactivate and delete it first.
+3. ZIP the `one-time-admin-promoter` folder and install it through **Plugins > Add New Plugin > Upload Plugin**, or place the folder in `wp-content/plugins/`. Activate **One-Time Admin Promoter**.
+4. Open **Tools > Admin Handover**. Enter the exact, case-sensitive existing username—not a display name or email address. Check the confirmation box and click **Complete handover and deactivate plugin**.
 5. Verify the target's Administrator role under **Users**, the administration email under **Settings > General**, and the plugin's inactive state under **Plugins**.
-6. Delete the inactive plugin and remove the `OTAP_TARGET_USERNAME` definition when convenient. Neither action reverses the handover or removes the attempt record.
+6. Delete the inactive plugin. This does not reverse the handover or remove the attempt record.
 
-This plugin cannot bypass permissions imposed by a host or agency. It requires configuration-file access and does not create accounts, request passwords, change passwords, or log in as the target.
+This plugin cannot bypass permissions imposed by a host or agency. It does not create accounts, request passwords, change passwords, or log in as the target.
+
+No `wp-config.php` edit is required. If the legacy `OTAP_TARGET_USERNAME` constant is already defined as a string, it only prefills the username field. The operator must still submit the confirmed form. The constant can be removed when file access is available. A prior attempt recorded by an older version continues to block another handover.
 
 ## What changes
 
@@ -46,7 +43,7 @@ The plugin schedules self-deactivation at shutdown after a claimed attempt, with
 
 ## Security and validation
 
-The plugin checks operator capabilities, an exact existing username, the target's email address, and the availability of the Administrator role before claiming an attempt. The normal WordPress Plugins activation flow supplies the activation nonce check. Direct file execution is blocked.
+The plugin checks operator capabilities, an exact existing username, the target's email address, and the availability of the Administrator role before claiming an attempt. The handover handler requires an authenticated POST request, an action-specific WordPress nonce, and explicit confirmation. No unauthenticated handover handler is registered. Direct file execution is blocked.
 
 There is no bundled automated test suite. PHP syntax checking does not verify a live handover; verify the resulting role, site email, and inactive plugin state on the intended installation.
 
