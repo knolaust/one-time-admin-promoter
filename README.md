@@ -1,5 +1,7 @@
 # One-Time Admin Promoter
 
+Current version: **1.0.1**.
+
 A single-site WordPress plugin that promotes one existing user to Administrator, copies that user's current email to **Settings > General > Administration Email Address**, and deactivates itself.
 
 Activate the plugin, then open **Tools > Admin Handover**, enter an existing username, and confirm the handover. Activation alone does not change any user or email setting. No FTP, configuration edit, or password is needed when installing through WordPress.
@@ -22,7 +24,7 @@ Activate the plugin, then open **Tools > Admin Handover**, enter an existing use
 
 This plugin cannot bypass permissions imposed by a host or agency. It does not create accounts, request passwords, change passwords, or log in as the target.
 
-No `wp-config.php` edit is required. If the legacy `OTAP_TARGET_USERNAME` constant is already defined as a string, it only prefills the username field. The operator must still submit the confirmed form. The constant can be removed when file access is available. A prior attempt recorded by an older version continues to block another handover.
+No `wp-config.php` edit is required. If the legacy `OTAP_TARGET_USERNAME` constant is already defined as a string, it only prefills the username field. The operator must still submit the confirmed form. The constant can be removed when file access is available. A prior attempt recorded by an older version remains visible for review before another handover can be allowed.
 
 ## What changes
 
@@ -37,9 +39,13 @@ WordPress may notify the old address about the administration-email change. The 
 
 The non-autoloaded option `otap_completed_v1` stores the status, target user ID, operator ID, and UTC timestamp. The plugin claims this record before changing the role to prevent concurrent or repeated attempts. It deliberately retains the record after plugin deletion; reinstalling or changing the configured username does not enable another run.
 
-An interrupted or failed attempt after the claim also blocks retries. Role and email updates are not a database transaction, so a failure can leave a partial handover. Inspect both settings manually and restore the prior role/email if necessary. No reset control is supplied.
+To correct a completed handover or retry a verification-failed attempt, reactivate the plugin and open **Tools > Admin Handover**. Review the current roles and site email, check the reset confirmation, and click **Allow another handover**. Then submit the handover form again with the intended username. The reset requires administrator permissions and a separate nonce-protected POST request.
 
-The plugin schedules self-deactivation at shutdown after a claimed attempt, with a fallback on a later authorized admin request. Validation failures before the claim do not consume the one-time operation.
+Resetting only clears the attempt record. It does not undo prior changes: a previously promoted user keeps Administrator access until you change their role manually. The next handover copies the newly selected user's current email to the site administration email.
+
+Interrupted attempts with status `started` and unrecognized records remain blocked and cannot be reset through this page. Inspect and resolve those manually. Role and email updates are not a database transaction, so a failure can leave a partial handover.
+
+The plugin deactivates after a submitted handover, with a shutdown fallback. Reactivation leaves it active so you can review the stored attempt. Validation failures, such as an unknown username, do not consume the one-time operation and can be corrected immediately.
 
 ## Security and validation
 
@@ -50,3 +56,15 @@ There is no bundled automated test suite. PHP syntax checking does not verify a 
 ## License
 
 GPL-2.0-or-later, as declared in the plugin header.
+
+## Changelog
+
+### 1.0.1
+
+- Keep the plugin active when reactivated so administrators can review a previous attempt.
+- Add a confirmed reset for completed and verification-failed attempts, allowing a corrected handover.
+- Keep interrupted attempts blocked and clarify that resetting does not undo earlier role or email changes.
+
+### 1.0.0
+
+- Initial release with a confirmed handover form under Tools > Admin Handover.
